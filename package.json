@@ -1,0 +1,25 @@
+{
+  "dependencies": {
+    "axios": "^0.27.2",
+    "bcrypt": "^5.0.1",
+    "compression": "^1.7.4",
+    "crypto": "^1.0.1",
+    "dotenv": "^16.0.0",
+    "express": "^4.17.3",
+    "fs": "^0.0.1-security",
+    "jikan4.js": "^0.3.3",
+    "jsonwebtoken": "^8.5.1",
+    "jwt-decode": "^3.1.2",
+    "mongoose": "^6.2.10",
+    "mongoose-unique-validator": "^3.0.0",
+    "node-fetch": "^3.2.4",
+    "nodemailer": "^6.7.3",
+    "nodemailer-sendgrid-transport": "^0.2.0",
+    "redaxios": "^0.5.0"
+  },
+  "devDependencies": {
+    "eslint": "^7.14.0",
+    "eslint-config-prettier": "^8.5.0",
+    "prettier": "^2.6.2"
+  }
+}
