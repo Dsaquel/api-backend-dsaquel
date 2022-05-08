@@ -55,7 +55,7 @@ exports.insertStuff = async (req, res, next) => {
 exports.getUserStuff = async (req, res, next) => {
   const token = req.params.token
   if(token === 'null' || token === 'undefined') {
-    return res.status(401).json({message: 'must be connected'})
+    return res.status(401).json({error: 'must be connected'})
   } else {
     const dataToken = jwt_decode(token)
     Library.find({_userId: dataToken.userId})
@@ -92,12 +92,12 @@ exports.getUserStuff = async (req, res, next) => {
 }
 
 exports.deleteUserStuff = async (req, res, next) => {
-  const token = req.params.token
-  if(token === 'null' || token === 'undefined') {
-    return res.status(401).json({message: 'must be connected'})
+  const token = req.body.token
+  if(token === null || token === undefined) {
+    return res.status(401).json({error: 'must be connected'})
   }
   else if(req.body._id === null) {
-    return res.status(404).json({message: 'no id stuff'})
+    return res.status(404).json({error: 'no id stuff'})
   }
    else {
     const dataToken = await jwt_decode(token)

@@ -11,15 +11,15 @@ exports.signup = (req, res, next) => {
   bcrypt
     .hash(req.body.password, 10)
     .then((hash) => {
-      const user = new User({
+      const newUser = new User({
         email: req.body.email,
         password: hash,
         pseudo: req.body.pseudo,
         isVerified: false,
       })
-      user.save(function () {
+      newUser.save(function () {
         const token = new Token({
-          _userId: user._id,
+          _userId: newUser._id,
           token: crypto.randomBytes(16).toString('hex'),
         })
         token.save(function (err) {
@@ -42,7 +42,7 @@ exports.signup = (req, res, next) => {
           })
           const mailOptions = {
             from: process.env.EMAIL_USERNAME,
-            to: user.email,
+            to: req.body.email,
             subject: 'Account Verification link',
             text:
               'Hello' +
@@ -51,7 +51,7 @@ exports.signup = (req, res, next) => {
               'Please verify your account by clicking the link: \nhttp://' +
               process.env.DOMAINE_FRONT +
               '/confirmation/' +
-              user.email +
+              req.body.email +
               '/' +
               token.token +
               '\n\nThank You!\n',
@@ -78,17 +78,17 @@ exports.login = (req, res, next) => {
   })
     .then((user) => {
       if (!user) {
-        return res.status(401).json({
+        return res.status(400).json({
           error: 'Utilisateur non trouvé !',
         })
       }
       bcrypt.compare(req.body.password, user.password).then((valid) => {
         if (!valid) {
-          return res.status(401).json({
+          return res.status(400).json({
             error: 'Mot de passe incorrect !',
           })
         } else if (!user.isVerified) {
-          return res.status(401).send({
+          return res.status(400).send({
             error: 'Your Email has not been verified. Please click on resend',
           })
         }
@@ -120,7 +120,7 @@ exports.confirmEmail = (req, res, next) => {
   }).then((token) => {
     if (!token) {
       return res.status(400).send({
-        message:
+        error:
           'Your verification link may have expired. Please click on resend for verify your Email.',
       })
     } else {
@@ -130,7 +130,7 @@ exports.confirmEmail = (req, res, next) => {
       }).then(async user => {
         if (!user) {
           return res.status(401).send({
-            message:
+            error:
               'We were unable to find a user for this verification. Please SignUp!',
           })
         } else if (user.isVerified) {
@@ -221,7 +221,7 @@ exports.linkPasswordReset = (req, res, next) => {
     email: req.body.email,
   }).then((user) => {
     if (!user) {
-      return res.status(500).send({
+      return res.status(404).send({
         error: "User doesn't exist",
       })
     }
@@ -274,8 +274,8 @@ exports.linkPasswordReset = (req, res, next) => {
 }
 
 exports.resetPassword = (req, res, next) => {
-  Token.findOne({ userId: req.token }).then(async (token) => {
-    if (!token) return res.status(500).send({ message: 'token expire' })
+  Token.findOne({ userId: req.body.token }).then(async (token) => {
+    if (!token) return res.status(400).send({ error: 'token expire' })
     const hash = await bcrypt.hash(req.body.password, 10)
     User.updateOne(
       { _id: token._userId },

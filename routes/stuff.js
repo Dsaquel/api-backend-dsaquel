@@ -4,7 +4,7 @@ const userCtrl = require('../controllers/stuff')
 
 router.post('/insertStuff', userCtrl.insertStuff)
 router.get('/getUserStuff/:token', userCtrl.getUserStuff)
-router.delete('/deleteUserStuff/:token', userCtrl.deleteUserStuff)
+router.delete('/deleteUserStuff', userCtrl.deleteUserStuff)
 
 router.get('/getManga/:id', userCtrl.getManga)
 router.get('/getAnime/:id', userCtrl.getAnime)
