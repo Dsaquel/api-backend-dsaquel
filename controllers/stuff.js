@@ -7,7 +7,7 @@ const jwt_decode = require('jwt-decode')
 
 exports.insertStuff = async (req, res, next) => {
   const token = req.body.token
-  if(token === null)return res.status(401).json({message: 'must be connected'})
+  if(token === null)return res.status(401).json({error: 'must be connected'})
   const dataToken = await jwt_decode(token)
     Library.findOne({
       _userId: dataToken.userId,

@@ -15,4 +15,7 @@ router.get('/pickMangas', userCtrl.pickMangas)
 router.get('/topReviewsAnime', userCtrl.topReviewsAnime)
 router.get('/animeSeasonNow', userCtrl.animeSeasonNow)
 
+router.get('/pagination', userCtrl.pagination)
+router.get('/animeFiltered', userCtrl.animeFiltered)
+
 module.exports = router;

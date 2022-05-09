@@ -1,7 +1,7 @@
+const { parse } = require('dotenv')
 const Jikan = require('jikan4.js')
 const client = new Jikan.Client()
 const ExpireMonth = require('../models/ExpireMonth')
-const axios = require('axios');
 
 exports.topManga = (req, res ,next) => {
     ExpireMonth.findOne({name: 'topManga'})
@@ -124,4 +124,26 @@ exports.pickMangas = (req, res, next) => {
       return res.status(200).send(JSON.parse(data.data))
     }
   })
+}
+
+exports.pagination = async (req, res, next) => {
+  const toto = await client.anime.search('anime', 1, {limit: 1})
+  res.send(toto)
+}
+
+exports.animeFiltered = async (req, res, next) => {
+  const title = (req.query.type) ? req.query.type : ''
+  const type = (req.query.type) ? req.query.type : undefined
+  const genres = (req.query.genres) ? [parseInt(req.query.genres)] : undefined
+  const orderBy = (req.query.orderBy) ? req.query.orderBy : undefined
+  const status = (req.query.status) ? req.query.status : undefined
+
+  const filter = Object.assign(
+    {}, (type !== undefined) && { type },
+        (genres !== undefined) && {genres},
+        (orderBy !== undefined) && {orderBy},
+        (status !== undefined) && {status},
+    );
+  const animeFiltered = await client.anime.search(title, filter, 1)
+  res.send(animeFiltered)
 }
