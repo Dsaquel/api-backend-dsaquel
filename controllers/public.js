@@ -1,8 +1,10 @@
-const baseUrl = 'https://api.jikan.moe/v4'
 const axios = require('axios').default
 const Jikan = require('jikan4.js')
 const client = new Jikan.Client()
+const nodemailer = require('nodemailer')
+const baseUrl = 'https://api.jikan.moe/v4'
 const ExpireMonth = require('../models/ExpireMonth')
+
 
 exports.getManga = async (req, res, next) => {
   const manga = await client.manga.get(parseInt(req.params.id))
@@ -160,4 +162,29 @@ exports.mangaRecommendations = async (req, res, next) => {
   axios.get(`${baseUrl}/manga/${parseInt(req.params.id)}/recommendations`)
     .then(responseApi => res.send(responseApi?.data))
     .catch(error => console.log(error))
+}
+
+exports.sendMessage = (req, res, next) => {
+  const transporter = nodemailer.createTransport({
+    name: 'dsaquel.com',
+    host: 'ssl0.ovh.net',
+    port: 465,
+    secure: true,
+    auth: {
+      user: process.env.EMAIL_USERNAME,
+      pass: process.env.EMAIL_PASSWORD,
+    },
+  })
+  const mailOptions = {
+    from: process.env.EMAIL_USERNAME,
+    to: process.env.PERSONNAL_EMAIL,
+    subject: 'Message de ' + req.body.name,
+    text: req.body.message
+  }
+  transporter.sendMail(mailOptions, (error, info) => {
+    if (error) {
+      return console.log(error)
+    }
+    return res.json({message: 'message sent'})
+  })
 }

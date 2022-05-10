@@ -23,4 +23,7 @@ router.get('/animeFiltered', userCtrl.animeFiltered)
 // character
 router.get('/character/:id', userCtrl.getCharacter)
 
+// mail
+router.post('/sendMessage', userCtrl.sendMessage)
+
 module.exports = router;
