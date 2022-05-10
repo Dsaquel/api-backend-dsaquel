@@ -127,11 +127,6 @@ exports.pickMangas = (req, res, next) => {
   })
 }
 
-exports.pagination = async (req, res, next) => {
-  const toto = await client.anime.search('anime', 1, {limit: 1})
-  res.send(toto)
-}
-
 exports.animeFiltered = async (req, res, next) => {
   const query = req._parsedUrl.search
   axios.get(`${baseUrl}/anime${query}`)
