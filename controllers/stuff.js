@@ -115,15 +115,6 @@ exports.deleteUserStuff = async (req, res, next) => {
   }
 }
 
-exports.getManga = async (req, res, next) => {
-  const manga = await client.manga.get(parseInt(req.params.id))
-  return res.status(200).send(manga)
-}
-
-exports.getAnime = async (req, res, next) => {
-  const anime = await client.anime.get(parseInt(req.params.id))
-  return res.status(200).send(anime)
-}
 
 
 

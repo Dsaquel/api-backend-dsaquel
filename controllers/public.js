@@ -4,6 +4,16 @@ const Jikan = require('jikan4.js')
 const client = new Jikan.Client()
 const ExpireMonth = require('../models/ExpireMonth')
 
+exports.getManga = async (req, res, next) => {
+  const manga = await client.manga.get(parseInt(req.params.id))
+  return res.status(200).send(manga)
+}
+
+exports.getAnime = async (req, res, next) => {
+  const anime = await client.anime.get(parseInt(req.params.id))
+  return res.status(200).send(anime)
+}
+
 exports.topManga = (req, res ,next) => {
     ExpireMonth.findOne({name: 'topManga'})
     .then(async data => {
@@ -109,7 +119,7 @@ exports.animeSeasonNow = async (req, res, next) => {
   })
 }
 
-exports.pickMangas = (req, res, next) => {
+exports.pickManga = (req, res, next) => {
   ExpireMonth.findOne({name: 'pickMangas'})
   .then(async data => {
     if(!data) {
@@ -130,6 +140,24 @@ exports.pickMangas = (req, res, next) => {
 exports.animeFiltered = async (req, res, next) => {
   const query = req._parsedUrl.search
   axios.get(`${baseUrl}/anime${query}`)
+    .then(responseApi => res.send(responseApi?.data))
+    .catch(error => console.log(error))
+}
+
+exports.mangaFiltered = async (req, res, next) => {
+  const query = req._parsedUrl.search
+  axios.get(`${baseUrl}/manga${query}`)
+    .then(responseApi => res.send(responseApi?.data))
+    .catch(error => console.log(error))
+}
+
+exports.getCharacter = async (req, res, next) => {
+  const character = await client.characters.get(parseInt(req.params.id))
+  return res.status(200).send(character)
+}
+
+exports.mangaRecommendations = async (req, res, next) => {
+  axios.get(`${baseUrl}/manga/${parseInt(req.params.id)}/recommendations`)
     .then(responseApi => res.send(responseApi?.data))
     .catch(error => console.log(error))
 }
