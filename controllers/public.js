@@ -1,4 +1,5 @@
-const { parse } = require('dotenv')
+const baseUrl = 'https://api.jikan.moe/v4'
+const axios = require('axios').default
 const Jikan = require('jikan4.js')
 const client = new Jikan.Client()
 const ExpireMonth = require('../models/ExpireMonth')
@@ -132,18 +133,8 @@ exports.pagination = async (req, res, next) => {
 }
 
 exports.animeFiltered = async (req, res, next) => {
-  const title = (req.query.type) ? req.query.type : ''
-  const type = (req.query.type) ? req.query.type : undefined
-  const genres = (req.query.genres) ? [parseInt(req.query.genres)] : undefined
-  const orderBy = (req.query.orderBy) ? req.query.orderBy : undefined
-  const status = (req.query.status) ? req.query.status : undefined
-
-  const filter = Object.assign(
-    {}, (type !== undefined) && { type },
-        (genres !== undefined) && {genres},
-        (orderBy !== undefined) && {orderBy},
-        (status !== undefined) && {status},
-    );
-  const animeFiltered = await client.anime.search(title, filter, 1)
-  res.send(animeFiltered)
+  const query = req._parsedUrl.search
+  axios.get(`${baseUrl}/anime${query}`)
+    .then(responseApi => res.send(responseApi?.data))
+    .catch(error => console.log(error))
 }
