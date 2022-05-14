@@ -10,5 +10,8 @@ router.post('/linkPasswordReset', userCtrl.linkPasswordReset)
 router.put('/resetPassword', userCtrl.resetPassword)
 router.get('/userProfile/:token', userCtrl.userProfile)
 router.put('/editUserProfile', userCtrl.editUserProfile)
+router.put('/deleteAccount', userCtrl.deleteAccount)
+router.put('/recupAccountByPassword', userCtrl.recupAccountByPassword)
+router.put('/recupAccountByBtn', userCtrl.recupAccountByBtn)
 
 module.exports = router

@@ -11,59 +11,71 @@ exports.signup = (req, res, next) => {
   bcrypt
     .hash(req.body.password, 10)
     .then((hash) => {
-      const newUser = new User({
-        email: req.body.email,
-        password: hash,
-        pseudo: req.body.pseudo,
-        isVerified: false,
-      })
-      newUser.save(function () {
-        const token = new Token({
-          _userId: newUser._id,
-          token: crypto.randomBytes(16).toString('hex'),
-        })
-        token.save(function (err) {
-          if (err) {
-            return res.status(500).send({
-              error: err.message,
+      User.findOne({ email: req.body.email })
+      .then(async userExist => {
+        if(!userExist) {
+          const newUser = new User({
+            email: req.body.email,
+            password: hash,
+            pseudo: req.body.pseudo,
+            isVerified: false,
+          })
+          newUser.save(function () {
+            const token = new Token({
+              _userId: newUser._id,
+              token: crypto.randomBytes(16).toString('hex'),
             })
-          }
-
-          const transporter = nodemailer.createTransport({
-            name: 'dsaquel.com',
-            host: 'ssl0.ovh.net',
-            port: 465,
-            secure: true,
-            auth: {
-              user: process.env.EMAIL_USERNAME,
-              pass: process.env.EMAIL_PASSWORD,
-            },
-            from: process.env.EMAIL_USERNAME
+            token.save(function (err) {
+              if (err) {
+                return res.status(500).send({
+                  error: err.message,
+                })
+              }
+    
+              const transporter = nodemailer.createTransport({
+                name: 'dsaquel.com',
+                host: 'ssl0.ovh.net',
+                port: 465,
+                secure: true,
+                auth: {
+                  user: process.env.EMAIL_USERNAME,
+                  pass: process.env.EMAIL_PASSWORD,
+                },
+                from: process.env.EMAIL_USERNAME
+              })
+              const mailOptions = {
+                from: process.env.EMAIL_USERNAME,
+                to: req.body.email,
+                subject: 'Account Verification link',
+                text:
+                  'Hello' +
+                  req.body.pseudo +
+                  ',\n\n' +
+                  'Please verify your account by clicking the link: \nhttp://' +
+                  process.env.DOMAINE_FRONT +
+                  '/confirmation/' +
+                  req.body.email +
+                  '/' +
+                  token.token +
+                  '\n\nThank You!\n',
+              }
+              transporter.sendMail(mailOptions, (error, info) => {
+                if (error) {
+                  return console.log(error)
+                }
+                return res.json({message: 'Email confirmaiton send'})
+              })
+            })
           })
-          const mailOptions = {
-            from: process.env.EMAIL_USERNAME,
-            to: req.body.email,
-            subject: 'Account Verification link',
-            text:
-              'Hello' +
-              req.body.pseudo +
-              ',\n\n' +
-              'Please verify your account by clicking the link: \nhttp://' +
-              process.env.DOMAINE_FRONT +
-              '/confirmation/' +
-              req.body.email +
-              '/' +
-              token.token +
-              '\n\nThank You!\n',
-          }
-          transporter.sendMail(mailOptions, (error, info) => {
-            if (error) {
-              return console.log(error)
-            }
-            return res.json({message: 'Email confirmaiton send'})
-          })
-        })
-      })
+        } else {
+            const passwordCompare = await bcrypt.compare(req.body.password, userExist.password)
+            if(passwordCompare) return res.status(400).send({ valid: true,  email: req.body.email }) 
+            if(!passwordCompare && userExist.desactivate_user === 1) return res.status(400).send({ error: true, password: true, email: req.body.email })
+            if(userExist) return res.status(400).send({ error: 'email already used' })
+            return res.status(404).send({ error: 'Not found' })
+        }
+    })
+    .catch(error => console.log(error))
     })
     .catch((error) =>
       res.status(500).json({
@@ -83,7 +95,20 @@ exports.login = (req, res, next) => {
         })
       }
       bcrypt.compare(req.body.password, user.password).then((valid) => {
-        if (!valid) {
+        if (!valid && user.desactivate_user === 1) {
+          return res.status(400).send({
+            error: true,
+            password: true,
+            email: req.body.email
+          })
+        }
+        else if (valid && user.desactivate_user === 1) {
+          return res.status(400).send({
+            valid,
+            email: req.body.email
+          })
+        }
+        else if (!valid) {
           return res.status(400).json({
             error: 'Mot de passe incorrect !',
           })
@@ -92,12 +117,13 @@ exports.login = (req, res, next) => {
             error: 'Your Email has not been verified. Please click on resend',
           })
         }
+        
         res.status(200).json({
           token: jwt.sign(
             {
               email: user.email,
               pseudo: user.pseudo,
-              userId: user.id,
+              userId: user._id,
             },
             'RANDOM_TOKEN_SECRET',
             {
@@ -322,4 +348,71 @@ exports.editUserProfile = (req, res, next) => {
       return res.status(200).json({ message: "Edited" })
     }
   )
+}
+
+exports.deleteAccount = (req, res, next) => {
+  if(!req.body.token || !req.body.email) return res.send({error: 'please login for delete your account'})
+  const dataToken = jwt_decode(req.body.token)
+  User.updateOne(
+    { _id: dataToken.userId, email: req.body.email },
+    { $set: { 
+      desactivate_user: 1
+    } 
+  },
+    function (err) {
+      if (err) return res.status(401).json({ error: 'error with delete, please try again' })
+      return res.status(200).json({ message: "account deleted" })
+    }
+  )
+}
+
+exports.recupAccountByPassword = (req, res, next) => {
+  if(!req.body.email || !req.body.password) return res.status(400).send({ error: 'Cannot user whithout data' })
+  User.findOne({
+    email: req.body.email,
+  })
+    .then( async (user) => {
+      if (!user) {
+        return res.status(400).json({
+          error: 'user not found !',
+        })
+      }
+      const comparePassword = await bcrypt.compare(req.body.password, user.password)
+      if(!comparePassword) return res.status(400).send({ error: 'Password not equal', passwordNotEqual: true })
+      user.desactivate_user = null
+      user.save({ validateModifiedOnly: true })
+      res.status(200).json({
+        token: jwt.sign(
+          {
+            email: user.email,
+            pseudo: user.pseudo,
+            userId: user.id,
+          },
+          'RANDOM_TOKEN_SECRET',
+          {
+            expiresIn: '24h',
+          }
+        ),
+      })
+    })
+}
+
+exports.recupAccountByBtn = async (req, res, next) => {
+  if(!req.body.email) return res.status(400).send({ error: 'Cannot user whithout data' })
+  const user = await User.findOne({ email: req.body.email })
+  user.desactivate_user = null
+  user.save({ validateModifiedOnly: true })
+  res.status(200).json({
+    token: jwt.sign(
+      {
+        email: user.email,
+        pseudo: user.pseudo,
+        userId: user._id,
+      },
+      'RANDOM_TOKEN_SECRET',
+      {
+        expiresIn: '24h',
+      }
+    ),
+  })
 }
