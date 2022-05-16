@@ -6,7 +6,7 @@ const userSchema = mongoose.Schema({
   isVerified: { type: Boolean, default: false },
   password: { type: String, required: true },
   pseudo: { type: String, required: true, unique: true },
-  desactivate_user: {type: Number, default: null }
+  desactivate_user: { type: Number, default: null },
 })
 
 userSchema.plugin(uniqueValidator)

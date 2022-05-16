@@ -4,14 +4,17 @@ const app = express()
 const publicRoutes = require('./routes/public')
 const stuffRoutes = require('./routes/stuff')
 const userRoutes = require('./routes/user')
-require('dotenv').config();
+require('dotenv').config()
 const compression = require('compression')
 
 mongoose
-  .connect(`mongodb+srv://Dsaquel:${process.env.BDD_PASSWORD}@cluster0.h7ena.mongodb.net/Dsaquel`, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  })
+  .connect(
+    `mongodb+srv://Dsaquel:${process.env.BDD_PASSWORD}@cluster0.h7ena.mongodb.net/Dsaquel`,
+    {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    }
+  )
   .then(() => console.log('Connexion à MongoDB réussie !'))
   .catch(() => console.log('Connexion à MongoDB échouée !'))
 

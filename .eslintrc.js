@@ -1,24 +1,18 @@
 module.exports = {
-    "env": {
-        "browser": true,
-        "commonjs": true,
-        "es2021": true
-    },
-    "extends": "eslint:recommended",
-    "parserOptions": {
-        sourceType: 'module',
-        ecmaVersion: 8,
-        ecmaFeatures: {
-          'jsx': true
-        }
-    },
-    rules: {
-        'prettier/prettier': [
-          'error',
-          {
-            endOfLine: 'auto',
-          },
-        ],
-      },
-      plugins: ['prettier'],
+  env: {
+    commonjs: true,
+    es2021: true,
+    node: true,
+  },
+  extends: 'eslint:recommended',
+  parserOptions: {
+    ecmaVersion: 12,
+  },
+  rules: {
+    quotes: ['error', 'single'],
+    indent: ['error', 2],
+    'no-multi-spaces': ['error'],
+    'no-shadow': 'off',
+    fallthrough: 'on',
+  },
 }

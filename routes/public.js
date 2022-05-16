@@ -19,6 +19,7 @@ router.get('/getAnime/:id', userCtrl.getAnime)
 router.get('/topReviewsAnime', userCtrl.topReviewsAnime)
 router.get('/animeSeasonNow', userCtrl.animeSeasonNow)
 router.get('/animeFiltered', userCtrl.animeFiltered)
+router.get('/episode/:title', userCtrl.episode)
 
 // character
 router.get('/character/:id', userCtrl.getCharacter)
@@ -26,4 +27,4 @@ router.get('/character/:id', userCtrl.getCharacter)
 // mail
 router.post('/sendMessage', userCtrl.sendMessage)
 
-module.exports = router;
+module.exports = router

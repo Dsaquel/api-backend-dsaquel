@@ -5,77 +5,87 @@ const Token = require('../models/Token')
 const crypto = require('crypto')
 const nodemailer = require('nodemailer')
 const jwt_decode = require('jwt-decode')
-require('dotenv').config();
+require('dotenv').config()
 
 exports.signup = (req, res, next) => {
   bcrypt
     .hash(req.body.password, 10)
     .then((hash) => {
       User.findOne({ email: req.body.email })
-      .then(async userExist => {
-        if(!userExist) {
-          const newUser = new User({
-            email: req.body.email,
-            password: hash,
-            pseudo: req.body.pseudo,
-            isVerified: false,
-          })
-          newUser.save(function () {
-            const token = new Token({
-              _userId: newUser._id,
-              token: crypto.randomBytes(16).toString('hex'),
+        .then(async (userExist) => {
+          if (!userExist) {
+            const newUser = new User({
+              email: req.body.email,
+              password: hash,
+              pseudo: req.body.pseudo,
+              isVerified: false,
             })
-            token.save(function (err) {
-              if (err) {
-                return res.status(500).send({
-                  error: err.message,
-                })
-              }
-    
-              const transporter = nodemailer.createTransport({
-                name: 'dsaquel.com',
-                host: 'ssl0.ovh.net',
-                port: 465,
-                secure: true,
-                auth: {
-                  user: process.env.EMAIL_USERNAME,
-                  pass: process.env.EMAIL_PASSWORD,
-                },
-                from: process.env.EMAIL_USERNAME
+            newUser.save(function () {
+              const token = new Token({
+                _userId: newUser._id,
+                token: crypto.randomBytes(16).toString('hex'),
               })
-              const mailOptions = {
-                from: process.env.EMAIL_USERNAME,
-                to: req.body.email,
-                subject: 'Account Verification link',
-                text:
-                  'Hello' +
-                  req.body.pseudo +
-                  ',\n\n' +
-                  'Please verify your account by clicking the link: \nhttp://' +
-                  process.env.DOMAINE_FRONT +
-                  '/confirmation/' +
-                  req.body.email +
-                  '/' +
-                  token.token +
-                  '\n\nThank You!\n',
-              }
-              transporter.sendMail(mailOptions, (error, info) => {
-                if (error) {
-                  return console.log(error)
+              token.save(function (err) {
+                if (err) {
+                  return res.status(500).send({
+                    error: err.message,
+                  })
                 }
-                return res.json({message: 'Email confirmaiton send'})
+
+                const transporter = nodemailer.createTransport({
+                  name: 'dsaquel.com',
+                  host: 'ssl0.ovh.net',
+                  port: 465,
+                  secure: true,
+                  auth: {
+                    user: process.env.EMAIL_USERNAME,
+                    pass: process.env.EMAIL_PASSWORD,
+                  },
+                  from: process.env.EMAIL_USERNAME,
+                })
+                const mailOptions = {
+                  from: process.env.EMAIL_USERNAME,
+                  to: req.body.email,
+                  subject: 'Account Verification link',
+                  text:
+                    'Hello' +
+                    req.body.pseudo +
+                    ',\n\n' +
+                    'Please verify your account by clicking the link: \nhttp://' +
+                    process.env.DOMAINE_FRONT +
+                    '/confirmation/' +
+                    req.body.email +
+                    '/' +
+                    token.token +
+                    '\n\nThank You!\n',
+                }
+                transporter.sendMail(mailOptions, (error, info) => {
+                  if (error) {
+                    return console.log(error)
+                  }
+                  return res.json({ message: 'Email confirmaiton send' })
+                })
               })
             })
-          })
-        } else {
-            const passwordCompare = await bcrypt.compare(req.body.password, userExist.password)
-            if(passwordCompare) return res.status(400).send({ valid: true,  email: req.body.email }) 
-            if(!passwordCompare && userExist.desactivate_user === 1) return res.status(400).send({ error: true, password: true, email: req.body.email })
-            if(userExist) return res.status(400).send({ error: 'email already used' })
+          } else {
+            const passwordCompare = await bcrypt.compare(
+              req.body.password,
+              userExist.password
+            )
+            if (passwordCompare)
+              return res
+                .status(400)
+                .send({ valid: true, email: req.body.email })
+            if (!passwordCompare && userExist.desactivate_user === 1)
+              return res
+                .status(400)
+                .send({ error: true, password: true, email: req.body.email })
+            if (userExist)
+              return res.status(400).send({ error: 'email already used' })
             return res.status(404).send({ error: 'Not found' })
-        }
-    })
-    .catch(error => console.log(error))
+          }
+        })
+        .catch((error) => console.log(error))
     })
     .catch((error) =>
       res.status(500).json({
@@ -99,16 +109,14 @@ exports.login = (req, res, next) => {
           return res.status(400).send({
             error: true,
             password: true,
-            email: req.body.email
+            email: req.body.email,
           })
-        }
-        else if (valid && user.desactivate_user === 1) {
+        } else if (valid && user.desactivate_user === 1) {
           return res.status(400).send({
             valid,
-            email: req.body.email
+            email: req.body.email,
           })
-        }
-        else if (!valid) {
+        } else if (!valid) {
           return res.status(400).json({
             error: 'Mot de passe incorrect !',
           })
@@ -117,7 +125,7 @@ exports.login = (req, res, next) => {
             error: 'Your Email has not been verified. Please click on resend',
           })
         }
-        
+
         res.status(200).json({
           token: jwt.sign(
             {
@@ -153,7 +161,7 @@ exports.confirmEmail = (req, res, next) => {
       User.findOne({
         _is: token._userId,
         email: req.params.email,
-      }).then(async user => {
+      }).then(async (user) => {
         if (!user) {
           return res.status(401).send({
             error:
@@ -190,9 +198,9 @@ exports.resendLink = (req, res, next) => {
           'We were unable to find a user with that email. Make sure your Email is correct!',
       })
     } else if (user.isVerified) {
-      return res
-        .status(403)
-        .json({error: 'This account has been already verified. Please log in.'})
+      return res.status(403).json({
+        error: 'This account has been already verified. Please log in.',
+      })
     } else {
       const token = new Token({
         _userId: user._id,
@@ -213,7 +221,7 @@ exports.resendLink = (req, res, next) => {
             user: process.env.EMAIL_USERNAME,
             pass: process.env.EMAIL_PASSWORD,
           },
-          from: process.env.EMAIL_USERNAME
+          from: process.env.EMAIL_USERNAME,
         })
         const mailOptions = {
           from: process.env.EMAIL_USERNAME,
@@ -235,7 +243,7 @@ exports.resendLink = (req, res, next) => {
           if (error) {
             return console.log(error)
           }
-          return res.json({message: 'Email confirmaiton resend now'})
+          return res.json({ message: 'Email confirmaiton resend now' })
         })
       })
     }
@@ -271,7 +279,7 @@ exports.linkPasswordReset = (req, res, next) => {
           user: process.env.EMAIL_USERNAME,
           pass: process.env.EMAIL_PASSWORD,
         },
-        from: process.env.EMAIL_USERNAME
+        from: process.env.EMAIL_USERNAME,
       })
       const mailOptions = {
         from: process.env.EMAIL_USERNAME,
@@ -293,7 +301,7 @@ exports.linkPasswordReset = (req, res, next) => {
         if (error) {
           return console.log(error)
         }
-        return res.status(200).json({message: 'mail sent'})
+        return res.status(200).json({ message: 'mail sent' })
       })
     })
   })
@@ -307,10 +315,9 @@ exports.resetPassword = (req, res, next) => {
       { _id: token._userId },
       { $set: { password: hash } },
       function (err) {
-        if (err) return res.status(500).send({ error: 'error, please try again' })
-        return res
-          .status(200)
-          .send({ message: 'password updated successfuly' })
+        if (err)
+          return res.status(500).send({ error: 'error, please try again' })
+        return res.status(200).send({ message: 'password updated successfuly' })
       }
     )
   })
@@ -318,87 +325,102 @@ exports.resetPassword = (req, res, next) => {
 
 exports.userProfile = (req, res, next) => {
   const token = req.params.token
-  if(token === 'null' || token === 'undefined') {
-    return res.status(401).json({error: 'must be connected'})
+  if (token === 'null' || token === 'undefined') {
+    return res.status(401).json({ error: 'must be connected' })
   }
   const dataToken = jwt_decode(token)
-  User.findOne({_id: dataToken.userId})
-  .then(user => {
-    if(!user) {
-      return res.status(404).json({error: 'User not found, please try again'})
+  User.findOne({ _id: dataToken.userId }).then((user) => {
+    if (!user) {
+      return res.status(404).json({ error: 'User not found, please try again' })
     }
-    return res.status(200).json({pseudo: user.pseudo, email: user.email})
+    return res.status(200).json({ pseudo: user.pseudo, email: user.email })
   })
 }
 
 exports.editUserProfile = (req, res, next) => {
   const token = req.body.token
-  if(token === null || token === undefined) {
-    return res.status(401).json({message: 'must be connected'})
+  if (token === null || token === undefined) {
+    return res.status(401).json({ message: 'must be connected' })
   }
   const dataToken = jwt_decode(token)
   User.updateOne(
     { _id: dataToken.userId },
-    { $set: { 
-      ...req.body
-    } 
-  },
+    {
+      $set: {
+        ...req.body,
+      },
+    },
     function (err) {
-      if (err) return res.status(401).json({ error: 'error with editing, please try again' })
-      return res.status(200).json({ message: "Edited" })
+      if (err)
+        return res
+          .status(401)
+          .json({ error: 'error with editing, please try again' })
+      return res.status(200).json({ message: 'Edited' })
     }
   )
 }
 
 exports.deleteAccount = (req, res, next) => {
-  if(!req.body.token || !req.body.email) return res.send({error: 'please login for delete your account'})
+  if (!req.body.token || !req.body.email)
+    return res.send({ error: 'please login for delete your account' })
   const dataToken = jwt_decode(req.body.token)
   User.updateOne(
     { _id: dataToken.userId, email: req.body.email },
-    { $set: { 
-      desactivate_user: 1
-    } 
-  },
+    {
+      $set: {
+        desactivate_user: 1,
+      },
+    },
     function (err) {
-      if (err) return res.status(401).json({ error: 'error with delete, please try again' })
-      return res.status(200).json({ message: "account deleted" })
+      if (err)
+        return res
+          .status(401)
+          .json({ error: 'error with delete, please try again' })
+      return res.status(200).json({ message: 'account deleted' })
     }
   )
 }
 
 exports.recupAccountByPassword = (req, res, next) => {
-  if(!req.body.email || !req.body.password) return res.status(400).send({ error: 'Cannot user whithout data' })
+  if (!req.body.email || !req.body.password)
+    return res.status(400).send({ error: 'Cannot user whithout data' })
   User.findOne({
     email: req.body.email,
-  })
-    .then( async (user) => {
-      if (!user) {
-        return res.status(400).json({
-          error: 'user not found !',
-        })
-      }
-      const comparePassword = await bcrypt.compare(req.body.password, user.password)
-      if(!comparePassword) return res.status(400).send({ error: 'Password not equal', passwordNotEqual: true })
-      user.desactivate_user = null
-      user.save({ validateModifiedOnly: true })
-      res.status(200).json({
-        token: jwt.sign(
-          {
-            email: user.email,
-            pseudo: user.pseudo,
-            userId: user.id,
-          },
-          'RANDOM_TOKEN_SECRET',
-          {
-            expiresIn: '24h',
-          }
-        ),
+  }).then(async (user) => {
+    if (!user) {
+      return res.status(400).json({
+        error: 'user not found !',
       })
+    }
+    const comparePassword = await bcrypt.compare(
+      req.body.password,
+      user.password
+    )
+    if (!comparePassword)
+      return res
+        .status(400)
+        .send({ error: 'Password not equal', passwordNotEqual: true })
+    user.desactivate_user = null
+    user.save({ validateModifiedOnly: true })
+    res.status(200).json({
+      token: jwt.sign(
+        {
+          email: user.email,
+          pseudo: user.pseudo,
+          userId: user.id,
+        },
+        'RANDOM_TOKEN_SECRET',
+        {
+          expiresIn: '24h',
+        }
+      ),
     })
+  })
 }
 
 exports.recupAccountByBtn = async (req, res, next) => {
-  if(!req.body.email) return res.status(400).send({ error: 'Cannot user whithout data' })
+  if (!req.body.email)
+    return res.status(400).send({ error: 'Cannot user whithout data' })
   const user = await User.findOne({ email: req.body.email })
   user.desactivate_user = null
   user.save({ validateModifiedOnly: true })
