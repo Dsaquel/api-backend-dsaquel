@@ -20,7 +20,7 @@ exports.topManga = (req, res) => {
   ExpireMonth.findOne({ name: 'topManga' }).then(async (data) => {
     if (!data) {
       const data = JSON.stringify(await client.top.listManga())
-      const topManga = new ExpireMonth({
+      new ExpireMonth({
         name: 'topManga',
         data,
       })
@@ -36,7 +36,7 @@ exports.animeUpComing = (req, res) => {
   ExpireMonth.findOne({ name: 'animeUpComing' }).then(async (data) => {
     if (!data) {
       const data = JSON.stringify(await client.seasons.getUpcoming())
-      const animeUpComing = new ExpireMonth({
+      new ExpireMonth({
         name: 'animeUpComing',
         data,
       })
@@ -52,7 +52,7 @@ exports.topCharacters = (req, res) => {
   ExpireMonth.findOne({ name: 'topCharacters' }).then(async (data) => {
     if (!data) {
       const data = JSON.stringify(await client.top.listCharacters())
-      const topCharacters = new ExpireMonth({
+      new ExpireMonth({
         name: 'topCharacters',
         data,
       })
@@ -73,7 +73,7 @@ exports.mostFavoritesManga = (req, res) => {
           type: 'manga',
         })
       )
-      const mostFavoritesManga = new ExpireMonth({
+      new ExpireMonth({
         name: 'mostFavoritesManga',
         data,
       })
@@ -89,7 +89,7 @@ exports.topReviewsAnime = (req, res) => {
   ExpireMonth.findOne({ name: 'topReviewsAnime' }).then(async (data) => {
     if (!data) {
       const data = JSON.stringify(await client.top.listReviews())
-      const topReviewsAnime = new ExpireMonth({
+      new ExpireMonth({
         name: 'topReviewsAnime',
         data,
       })
@@ -105,7 +105,7 @@ exports.animeSeasonNow = async (req, res) => {
   ExpireMonth.findOne({ name: 'animeSeasonNow' }).then(async (data) => {
     if (!data) {
       const data = JSON.stringify(await client.seasons.getNow())
-      const animeSeasonNow = new ExpireMonth({
+      new ExpireMonth({
         name: 'animeSeasonNow',
         data,
       })
@@ -124,7 +124,7 @@ exports.pickManga = (req, res) => {
       const data = JSON.stringify(
         allData.sort(() => Math.random() - Math.random()).slice(0, 9)
       )
-      const pickMangas = new ExpireMonth({
+      new ExpireMonth({
         name: 'pickMangas',
         data,
       })
