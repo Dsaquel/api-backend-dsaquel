@@ -4,7 +4,10 @@ const client = new Jikan.Client()
 const nodemailer = require('nodemailer')
 const baseUrl = 'https://api.jikan.moe/v4'
 const ExpireMonth = require('../models/ExpireMonth')
-const api = require('anime-vostfr')
+//TODO: delete ?
+// const episodeAnime = require('anime-vostfr')
+// const getVideoFromIframe = require('iframe-to-video')
+// const fetch = require('node-fetch')
 
 exports.getManga = async (req, res) => {
   const manga = await client.manga.get(parseInt(req.params.id))
@@ -186,17 +189,5 @@ exports.sendMessage = (req, res) => {
       return console.log(error)
     }
     return res.json({ message: 'message sent' })
-  })
-}
-
-exports.episode = (req, res) => {
-  api.loadAnime().then(async (data) => {
-    const another = api.searchAnime(data, req.params.title)
-
-    console.log(another[0])
-
-    // const resInfo = await api.getEmbed(another[0].url)
-    //  console.log('resInfo')
-    return res.send({ title: another[0] })
   })
 }
