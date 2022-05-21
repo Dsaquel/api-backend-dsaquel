@@ -36,4 +36,5 @@ app.use(compression())
 app.use('/api/public', publicRoutes)
 app.use('/api/stuff', stuffRoutes)
 app.use('/api/auth', userRoutes)
+
 module.exports = app

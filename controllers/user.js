@@ -360,7 +360,7 @@ exports.editUserProfile = (req, res, next) => {
   )
 }
 
-exports.deleteAccount = (req, res, next) => {
+exports.deleteAccount = async (req, res, next) => {
   if (!req.body.token || !req.body.email)
     return res.send({ error: 'please login for delete your account' })
   const dataToken = jwt_decode(req.body.token)
