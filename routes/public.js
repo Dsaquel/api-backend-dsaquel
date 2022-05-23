@@ -8,17 +8,17 @@ router.get('/animeUpComing', userCtrl.animeUpComing)
 router.get('/topCharacters', userCtrl.topCharacters)
 
 //manga
-router.get('/getManga/:id', userCtrl.getManga)
-router.get('/mostFavoritesManga', userCtrl.mostFavoritesManga)
 router.get('/pickManga', userCtrl.pickManga)
-router.get('/:id/recommendations', userCtrl.mangaRecommendations)
+router.get('/manga/:id', userCtrl.manga)
 router.get('/mangaFiltered', userCtrl.mangaFiltered)
+router.get('/mostFavoritesManga', userCtrl.mostFavoritesManga)
+router.get('/:id/recommendations', userCtrl.mangaRecommendations)
 
 //anime
-router.get('/getAnime/:id', userCtrl.getAnime)
-router.get('/topReviewsAnime', userCtrl.topReviewsAnime)
-router.get('/animeSeasonNow', userCtrl.animeSeasonNow)
+router.get('/anime/:id', userCtrl.anime)
 router.get('/animeFiltered', userCtrl.animeFiltered)
+router.get('/animeSeasonNow', userCtrl.animeSeasonNow)
+router.get('/topReviewsAnime', userCtrl.topReviewsAnime)
 
 // character
 router.get('/character/:id', userCtrl.getCharacter)
