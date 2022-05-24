@@ -1,15 +1,15 @@
 const express = require('express')
-const mongoose = require('mongoose')
 const app = express()
+const env = require('./conf/env')
+const mongoose = require('mongoose')
 const publicRoutes = require('./routes/public')
 const stuffRoutes = require('./routes/stuff')
 const userRoutes = require('./routes/user')
-require('dotenv').config()
 const compression = require('compression')
 
 mongoose
   .connect(
-    `mongodb+srv://Dsaquel:${process.env.BDD_PASSWORD}@cluster0.h7ena.mongodb.net/Dsaquel`,
+    `mongodb+srv://Dsaquel:${env.BDD_PASSWORD}@cluster0.h7ena.mongodb.net/Dsaquel`,
     {
       useNewUrlParser: true,
       useUnifiedTopology: true,

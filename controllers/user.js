@@ -1,13 +1,13 @@
-require('dotenv').config()
 const crypto = require('crypto')
 const bcrypt = require('bcrypt')
+const env = require('../conf/env')
 const jwt = require('jsonwebtoken')
 const User = require('../models/User')
 const Token = require('../models/Token')
 const jwt_decode = require('jwt-decode')
 const transporter = require('../conf/mail')
 
-exports.signup = async (req, res, next) => {
+exports.signup = async (req, res) => {
   const hash = await bcrypt.hash(req.body.password, 10)
   const userExist = await User.findOne({ email: req.body.email })
   if (!userExist) {
@@ -29,7 +29,7 @@ exports.signup = async (req, res, next) => {
           })
         }
         const mailOptions = {
-          from: process.env.EMAIL_USERNAME,
+          from: env.EMAIL_USERNAME,
           to: req.body.email,
           subject: 'Account Verification link',
           text:
@@ -37,7 +37,7 @@ exports.signup = async (req, res, next) => {
             req.body.pseudo +
             ',\n\n' +
             'Please verify your account by clicking the link: \nhttp://' +
-            process.env.DOMAINE_FRONT +
+            env.DOMAINE_FRONT +
             '/confirmation/' +
             req.body.email +
             '/' +
@@ -56,6 +56,7 @@ exports.signup = async (req, res, next) => {
     if (!userExist.isVerified)
       return res.status(400).send({
         resendEmail: true,
+        email: req.body.email,
         error: 'Your Email has not been verified',
       })
     const passwordCompare = await bcrypt.compare(
@@ -73,7 +74,7 @@ exports.signup = async (req, res, next) => {
   }
 }
 
-exports.login = async (req, res, next) => {
+exports.login = async (req, res) => {
   const user = await User.findOne({
     email: req.body.email,
   })
@@ -101,6 +102,7 @@ exports.login = async (req, res, next) => {
   } else if (!user.isVerified) {
     return res.status(400).send({
       resendEmail: true,
+      email: req.body.email,
       error: 'Your Email has not been verified',
     })
   }
@@ -120,7 +122,7 @@ exports.login = async (req, res, next) => {
   })
 }
 
-exports.confirmEmail = async (req, res, next) => {
+exports.confirmEmail = async (req, res) => {
   const token = await Token.findOne({
     token: req.params.token,
   })
@@ -155,7 +157,7 @@ exports.confirmEmail = async (req, res, next) => {
   }
 }
 
-exports.resendLink = async (req, res, next) => {
+exports.resendLink = async (req, res) => {
   const user = await User.findOne({
     email: req.body.email,
   })
@@ -180,15 +182,14 @@ exports.resendLink = async (req, res, next) => {
         })
       }
       const mailOptions = {
-        from: process.env.EMAIL_USERNAME,
+        from: env.EMAIL_USERNAME,
         to: user.email,
         subject: 'Account Verification link',
         text:
           'Hello' +
-          req.body.pseudo +
           ',\n\n' +
           'Please verify your account by clicking the link: \nhttp://' +
-          process.env.DOMAINE_FRONT +
+          env.DOMAINE_FRONT +
           '/confirmation/' +
           user.email +
           '/' +
@@ -205,7 +206,7 @@ exports.resendLink = async (req, res, next) => {
   }
 }
 
-exports.linkPasswordReset = async (req, res, next) => {
+exports.linkPasswordReset = async (req, res) => {
   const user = await User.findOne({
     email: req.body.email,
   })
@@ -226,7 +227,7 @@ exports.linkPasswordReset = async (req, res, next) => {
       })
     }
     const mailOptions = {
-      from: process.env.EMAIL_USERNAME,
+      from: env.EMAIL_USERNAME,
       to: user.email,
       subject: 'Password reset Dsaquel',
       text:
@@ -234,7 +235,7 @@ exports.linkPasswordReset = async (req, res, next) => {
         user.pseudo +
         ',\n\n' +
         'Click on this link for reset your password: \nhttp://' +
-        process.env.DOMAINE_FRONT +
+        env.DOMAINE_FRONT +
         '/reset-password/' +
         user.email +
         '/' +
@@ -250,7 +251,7 @@ exports.linkPasswordReset = async (req, res, next) => {
   })
 }
 
-exports.resetPassword = async (req, res, next) => {
+exports.resetPassword = async (req, res) => {
   const token = await Token.findOne({ userId: req.body.token })
   if (!token) return res.status(400).send({ error: 'token expire' })
   const hash = await bcrypt.hash(req.body.password, 10)
@@ -264,7 +265,7 @@ exports.resetPassword = async (req, res, next) => {
   )
 }
 
-exports.userProfile = async (req, res, next) => {
+exports.userProfile = async (req, res) => {
   const token = req.params.token
   if (token === 'null' || token === 'undefined') {
     return res.status(401).json({ error: 'must be connected' })
@@ -277,7 +278,7 @@ exports.userProfile = async (req, res, next) => {
   return res.status(200).json({ pseudo: user.pseudo, email: user.email })
 }
 
-exports.editUserProfile = (req, res, next) => {
+exports.editUserProfile = (req, res) => {
   const token = req.body.token
   if (token === null || token === undefined) {
     return res.status(401).json({ message: 'must be connected' })
@@ -300,7 +301,7 @@ exports.editUserProfile = (req, res, next) => {
   )
 }
 
-exports.deleteAccount = async (req, res, next) => {
+exports.deleteAccount = async (req, res) => {
   if (!req.body.token || !req.body.email)
     return res.send({ error: 'please login for delete your account' })
   const dataToken = jwt_decode(req.body.token)
@@ -321,7 +322,7 @@ exports.deleteAccount = async (req, res, next) => {
   )
 }
 
-exports.recupAccountByPassword = async (req, res, next) => {
+exports.recupAccountByPassword = async (req, res) => {
   if (!req.body.email || !req.body.password)
     return res.status(400).send({ error: 'Cannot user whithout data' })
   const user = await User.findOne({
@@ -354,7 +355,7 @@ exports.recupAccountByPassword = async (req, res, next) => {
   })
 }
 
-exports.recupAccountByBtn = async (req, res, next) => {
+exports.recupAccountByBtn = async (req, res) => {
   if (!req.body.email)
     return res.status(400).send({ error: 'Cannot user whithout data' })
   const user = await User.findOne({ email: req.body.email })

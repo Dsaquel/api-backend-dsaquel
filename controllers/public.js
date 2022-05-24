@@ -1,5 +1,6 @@
 const Jikan = require('jikan4.js')
 const client = new Jikan.Client()
+const env = require('../conf/env')
 const axios = require('axios').default
 const baseUrl = 'https://api.jikan.moe/v4'
 const transporter = require('../conf/mail')
@@ -7,12 +8,12 @@ const ExpireMonth = require('../models/ExpireMonth')
 
 exports.manga = async (req, res) => {
   const manga = await client.manga.get(parseInt(req.params.id))
-  return res.status(200).send(manga)
+  return res.send(manga)
 }
 
 exports.anime = async (req, res) => {
   const anime = await client.anime.get(parseInt(req.params.id))
-  return res.status(200).send(anime)
+  return res.send(anime)
 }
 
 exports.topManga = async (req, res) => {
@@ -23,9 +24,9 @@ exports.topManga = async (req, res) => {
       name: 'topManga',
       data,
     }).save()
-    res.status(200).send(data)
+    res.send(data)
   } else {
-    res.status(200).send(JSON.parse(data.data))
+    res.send(JSON.parse(data.data))
   }
 }
 
@@ -37,9 +38,9 @@ exports.animeUpComing = async (req, res) => {
       name: 'animeUpComing',
       data,
     }).save()
-    res.status(200).send(data)
+    res.send(data)
   } else {
-    res.status(200).send(JSON.parse(data.data))
+    res.send(JSON.parse(data.data))
   }
 }
 
@@ -51,9 +52,9 @@ exports.topCharacters = async (req, res) => {
       name: 'topCharacters',
       data,
     }).save()
-    res.status(200).send(data)
+    res.send(data)
   } else {
-    res.status(200).send(JSON.parse(data.data))
+    res.send(JSON.parse(data.data))
   }
 }
 
@@ -70,9 +71,9 @@ exports.mostFavoritesManga = async (req, res) => {
       name: 'mostFavoritesManga',
       data,
     }).save()
-    res.status(200).send(data)
+    res.send(data)
   } else {
-    res.status(200).send(JSON.parse(data.data))
+    res.send(JSON.parse(data.data))
   }
 }
 
@@ -84,9 +85,9 @@ exports.topReviewsAnime = async (req, res) => {
       name: 'topReviewsAnime',
       data,
     }).save()
-    res.status(200).send(data)
+    res.send(data)
   } else {
-    res.status(200).send(JSON.parse(data.data))
+    res.send(JSON.parse(data.data))
   }
 }
 
@@ -98,9 +99,9 @@ exports.animeSeasonNow = async (req, res) => {
       name: 'animeSeasonNow',
       data,
     }).save()
-    res.status(200).send(data)
+    res.send(data)
   } else {
-    res.status(200).send(JSON.parse(data.data))
+    res.send(JSON.parse(data.data))
   }
 }
 
@@ -115,9 +116,9 @@ exports.pickManga = async (req, res) => {
       name: 'pickMangas',
       data,
     }).save()
-    res.status(200).send(data)
+    res.send(data)
   } else {
-    res.status(200).send(JSON.parse(data.data))
+    res.send(JSON.parse(data.data))
   }
 }
 
@@ -135,7 +136,7 @@ exports.mangaFiltered = async (req, res) => {
 
 exports.getCharacter = async (req, res) => {
   const character = await client.characters.get(parseInt(req.params.id))
-  return res.status(200).send(character)
+  res.send(character)
 }
 
 exports.mangaRecommendations = async (req, res) => {
@@ -147,12 +148,12 @@ exports.mangaRecommendations = async (req, res) => {
 
 exports.sendMessage = (req, res) => {
   const mailOptions = {
-    from: process.env.EMAIL_USERNAME,
-    to: process.env.PERSONNAL_EMAIL,
+    from: env.EMAIL_USERNAME,
+    to: env.PERSONNAL_EMAIL,
     subject: 'Message de ' + req.body.name,
     text: req.body.message,
   }
-  transporter.sendMail(mailOptions, (error, info) => {
+  transporter.sendMail(mailOptions, (error) => {
     if (error) {
       return console.log(error)
     }

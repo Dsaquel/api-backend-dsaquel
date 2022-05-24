@@ -1,5 +1,5 @@
 const nodemailer = require('nodemailer')
-require('dotenv').config()
+const env = require('./env')
 
 module.exports = nodemailer.createTransport({
   name: 'dsaquel.com',
@@ -7,9 +7,8 @@ module.exports = nodemailer.createTransport({
   port: 465,
   secure: true,
   auth: {
-    user: process.env.EMAIL_USERNAME,
-    pass: process.env.EMAIL_PASSWORD,
+    user: env.EMAIL_USERNAME,
+    pass: env.EMAIL_PASSWORD,
   },
-  from: process.env.EMAIL_USERNAME,
+  from: env.EMAIL_USERNAME,
 })
-

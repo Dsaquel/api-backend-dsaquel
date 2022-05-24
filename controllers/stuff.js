@@ -4,7 +4,7 @@ const Library = require('../models/Library')
 const ExpireWeek = require('../models/ExpireWeek')
 const jwt_decode = require('jwt-decode')
 
-exports.insertStuff = async (req, res, next) => {
+exports.insertStuff = async (req, res) => {
   const token = req.body.token
   if (token === null)
     return res.status(401).json({ error: 'must be connected' })
@@ -49,7 +49,7 @@ exports.insertStuff = async (req, res, next) => {
   }
 }
 
-exports.getUserStuff = async (req, res, next) => {
+exports.getUserStuff = async (req, res) => {
   const token = req.params.token
   if (token === 'null' || token === 'undefined') {
     return res.status(401).json({ error: 'must be connected' })
@@ -84,7 +84,7 @@ exports.getUserStuff = async (req, res, next) => {
   }
 }
 
-exports.deleteUserStuff = async (req, res, next) => {
+exports.deleteUserStuff = async (req, res) => {
   const token = req.body.token
   if (token === null || token === undefined) {
     return res.status(401).json({ error: 'must be connected' })
