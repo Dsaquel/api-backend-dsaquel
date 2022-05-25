@@ -48,7 +48,7 @@ exports.signup = async (req, res) => {
           if (error) {
             return console.log(error)
           }
-          return res.json({ message: 'Email confirmaiton send' })
+          return res.json({ message: 'Email confirmaiton sent' })
         })
       })
     })
@@ -80,7 +80,7 @@ exports.login = async (req, res) => {
   })
   if (!user) {
     return res.status(400).json({
-      error: 'user not found !',
+      error: 'user not found',
     })
   }
   const valid = await bcrypt.compare(req.body.password, user.password)
@@ -97,7 +97,7 @@ exports.login = async (req, res) => {
     })
   } else if (!valid) {
     return res.status(400).json({
-      error: 'incorrect password!',
+      error: 'email or password incorrect please try again',
     })
   } else if (!user.isVerified) {
     return res.status(400).send({
@@ -184,7 +184,7 @@ exports.resendLink = async (req, res) => {
       const mailOptions = {
         from: env.EMAIL_USERNAME,
         to: user.email,
-        subject: 'Account Verification link',
+        subject: 'Account Verification',
         text:
           'Hello' +
           ',\n\n' +
@@ -229,7 +229,7 @@ exports.linkPasswordReset = async (req, res) => {
     const mailOptions = {
       from: env.EMAIL_USERNAME,
       to: user.email,
-      subject: 'Password reset Dsaquel',
+      subject: 'Password reset',
       text:
         'Hello ' +
         user.pseudo +
@@ -324,20 +324,20 @@ exports.deleteAccount = async (req, res) => {
 
 exports.recupAccountByPassword = async (req, res) => {
   if (!req.body.email || !req.body.password)
-    return res.status(400).send({ error: 'Cannot user whithout data' })
+    return res.status(400).send({ error: 'please send correct the form' })
   const user = await User.findOne({
     email: req.body.email,
   })
   if (!user) {
     return res.status(400).json({
-      error: 'user not found !',
+      error: 'user not found',
     })
   }
   const comparePassword = await bcrypt.compare(req.body.password, user.password)
   if (!comparePassword)
     return res
       .status(400)
-      .send({ error: 'Password not equal', passwordNotEqual: true })
+      .send({ error: 'incorrect password', passwordNotEqual: true })
   user.desactivate_user = null
   user.save({ validateModifiedOnly: true })
   res.status(200).json({
@@ -357,7 +357,7 @@ exports.recupAccountByPassword = async (req, res) => {
 
 exports.recupAccountByBtn = async (req, res) => {
   if (!req.body.email)
-    return res.status(400).send({ error: 'Cannot user whithout data' })
+    return res.status(400).send({ error: 'please send correct the form' })
   const user = await User.findOne({ email: req.body.email })
   user.desactivate_user = null
   user.save({ validateModifiedOnly: true })
