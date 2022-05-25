@@ -95,15 +95,15 @@ exports.login = async (req, res) => {
       valid,
       email: req.body.email,
     })
-  } else if (!valid) {
-    return res.status(400).json({
-      error: 'email or password incorrect please try again',
-    })
   } else if (!user.isVerified) {
     return res.status(400).send({
       resendEmail: true,
       email: req.body.email,
       error: 'Your Email has not been verified',
+    })
+  } else if (!valid) {
+    return res.status(400).json({
+      error: 'email or password incorrect please try again',
     })
   }
 
